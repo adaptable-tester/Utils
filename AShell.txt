@@ -1,0 +1,25 @@
+#!/bin/bash
+
+remote_host="your_remote_host"
+remote_user="your_username"
+remote_directory="/path/to/remote_directory"
+log_file="file.log"
+search_string="abc"
+
+# SSH into the remote host and execute the commands
+ssh "$remote_user@$remote_host" "
+  cd \"$remote_directory\"
+
+  # Find the line number of the most recent occurrence of the search string
+  line_number=\$(grep -n \"$search_string\" \"$log_file\" | tail -n 1 | cut -d \":\" -f 1)
+
+  if [[ -n \$line_number ]]; then
+    # Print the 100 lines before and after the matching line
+    start_line=\$((line_number - 100))
+    end_line=\$((line_number + 100))
+
+    sed -n \"\${start_line},\${end_line}p\" \"$log_file\"
+  else
+    echo \"No occurrence of '\$search_string' found in the log file.\"
+  fi
+"
